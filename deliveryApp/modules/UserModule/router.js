@@ -7,12 +7,18 @@ const LocalStrategy = require('passport-local');
 
 const salt = 'f844b09ff50c';
 
-passport.use(new LocalStrategy(
+passport.use('local', new LocalStrategy(
+    {
+		usernameField: 'email',
+		passwordField: 'password'
+	},
 	function(email, password, done) {
 		User.findOne({ email }, (err, user) => {
 			if (err) { return done(err); }
 			if (!user) { return done(null, false); }
-			if (user.password !== crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`)) { return done(null, false); }
+            const hash = crypto.pbkdf2Sync(password, salt, 310000, 32, `sha256`).toString(`hex`)
+
+			if (user.passwordHash !== hash) { return done(null, false); }
 			return done(null, user);
 		});
 	}
@@ -21,8 +27,7 @@ passport.use(new LocalStrategy(
 passport.serializeUser(function(user, cb) {
 	process.nextTick(function() {
         passport.authenticate('local'),
-        console.log('user', user);
-	    cb(null, { id: user.id, emai: user.email });
+	    cb(null, { email: user.email });
 	});
 });
   
@@ -32,32 +37,35 @@ passport.deserializeUser(function(user, cb) {
 	});
 });
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', function(req, res, next) {
     const {email, password, name, contactPhone} = req.body
+    crypto.pbkdf2(password, salt, 310000, 32, 'sha256', async function(err, password) {
+        if (err) { return next(err); }
 
-    const passwordHash = crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
-
-    const newUser = new User({
-        email, passwordHash, name, contactPhone
-    })
-
-    try {
-        await newUser.save();
-        const {_id, email, name, contactPhone} = newUser
-        res.json({
-            data: {
-                id: _id, email, name, contactPhone
-            },
-            status: 'ok'
+        const passwordHash = password.toString(`hex`)
+        const newUser = new User({
+            email, passwordHash, name, contactPhone
         })
-    } catch (e) {
-        console.error(e);
-        res.json({
-            "error": "email занят",
-            "status": "error"
-        })
-    }
-})
+
+        try {
+            await newUser.save();
+            const {_id, email, name, contactPhone} = newUser
+            res.json({
+                data: {
+                    id: _id, email, name, contactPhone
+                },
+                status: 'ok'
+            })
+        } catch (e) {
+            console.error(e);
+            res.json({
+                "error": "email занят",
+                "status": "error"
+            })
+        }
+
+    });
+  });
 
 // router.post('/signin', (req, res) => {
 
@@ -81,18 +89,15 @@ router.post('/signup', async (req, res) => {
 //         })
 //     })
 
-
 // })
 
 router.post('/signin', 
     passport.authenticate('local'),
-    function(req, res) {
+    (req, res) => {
+        console.log('bad');
         console.log(req.body);
-        res.json(req.body)
+        res.status(200).json(req.body)
     }
 )
-
-
-
 
 module.exports = router;
