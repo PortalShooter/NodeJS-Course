@@ -25,9 +25,9 @@ passport.use('local', new LocalStrategy(
 ));
 
 passport.serializeUser(function(user, cb) {
+    console.log('user', user);
 	process.nextTick(function() {
-        passport.authenticate('local'),
-	    cb(null, { email: user.email });
+	    cb(null, { id: user._id });
 	});
 });
   

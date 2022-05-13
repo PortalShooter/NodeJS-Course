@@ -5,9 +5,9 @@ const session = require('express-session');
 const passport = require('passport');
 
 const app = express();
-const RedisStore = require("connect-redis")(session);
 const { createClient } = require("redis")
 const redisClient = createClient({ legacyMode: true })
+const RedisStore = require("connect-redis")(session);
 redisClient.connect().catch(console.error)
 
 const routesUser = require('./modules/UserModule/router.js');
@@ -31,7 +31,6 @@ const UserDB = process.env.DB_USERNAME || 'root';
 const PasswordDB = process.env.DB_PASSWORD || 'qwerty12345';
 const NameDB = process.env.DB_NAME || 'delivery';
 const HostDb = process.env.DB_HOST || 'mongodb://localhost:27017/';
-
 
 (async () => {
 
