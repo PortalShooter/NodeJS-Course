@@ -1,15 +1,35 @@
 version: '3.7'
 
 services:
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
   mongodb:
     image: mongo
     restart: always
     expose:
       - 27017
+    ports:
+      - 27017:27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME:-root}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD:-password}
       - MONGO_INITDB_ROOT_DATABASE=${DB_DATABASE:-delivery_database}
+    volumes:
+      - ./deliveryApp/db:/data/db
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports: 
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${DB_USERNAME:-root}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${DB_PASSWORD:-password}
+    depends_on:
+      - mongodb
 
   delivery:
     build: ./deliveryApp
@@ -21,13 +41,6 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-password}
       - DB_NAME=${DB_NAME:-delivery_database}
       - DB_HOST=mongodb://mongodb:27017
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - mongodb
-      - redis
-  
-  redis:
-    image: redis
-    restart: always
-    ports:
-      - 6379:6379
-    command: ["sh", "-c", "exec redis-server"]
