@@ -7,7 +7,7 @@ router.post('/create', async (req, res) => {
     res.json(advertisement)
 })
 
-router.post('/remove:id', async (req, res) => {
+router.delete('/:id', async (req, res) => {
     const {id} = req.params
     const advertisement = await Advertisement.remove(id);
     res.json(advertisement)
@@ -15,13 +15,6 @@ router.post('/remove:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
     const advertisements = await Advertisement.find(req.body);
-    res.json(advertisements)
-})
-
-router.post('/', async (req, res) => {
-    const advertisements = await Advertisement.find(req.body);
-
-    
     res.json(advertisements)
 })
 

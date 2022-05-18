@@ -1,6 +1,5 @@
 const AdvertisementModel = require('./model');
 
-
 const Advertisement = {
     find: (params) => {
         if (typeof params === 'object') {

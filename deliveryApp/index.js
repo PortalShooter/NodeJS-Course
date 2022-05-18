@@ -4,15 +4,22 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const passport = require('passport');
 
+
 const app = express();
 const { createClient } = require("redis")
 const redisClient = createClient({ url: process.env.REDIS_URL, legacyMode: true })
 const RedisStore = require("connect-redis")(session);
 redisClient.connect().catch(console.error)
 
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
 const routesUser = require('./modules/UserModule/router');
 const routesAdvertisements = require('./modules/Advertisement/router');
-
+const routesMessage = require('./modules/Chat/Message/route');
+const routesChat = require('./modules/Chat/router');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -26,8 +33,15 @@ app.use(
     })
 );
 
+app.use('/api/chat', routesChat);
+app.use('/api/message', routesMessage);
 app.use('/api/advertisements', routesAdvertisements);
 app.use('/api', routesUser);
+
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+});
 
 const PORT = process.env.PORT || 3000;
 const UserDB = process.env.DB_USERNAME || 'root';
@@ -44,7 +58,7 @@ const HostDb = process.env.DB_HOST || 'mongodb://localhost:27017/';
         useNewUrlParser: true,
         useUnifiedTopology: true
     }).then(() => {
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`=== start server PORT ${PORT} ===`);
         });
     })
