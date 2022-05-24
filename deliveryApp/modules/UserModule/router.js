@@ -3,6 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
+const path = require('path')
 
 const UserModule = require('./service')
 
@@ -25,6 +26,7 @@ passport.use('local', new LocalStrategy(
 
 passport.serializeUser(function(user, cb) {
 	process.nextTick(function() {
+        console.log('user', user);
 	    cb(null, { id: user._id });
 	});
 });
@@ -55,23 +57,32 @@ router.post('/signup', async function(req, res) {
     }  
 });
 
-router.post('/signin', function(req,res,next) {
-    passport.authenticate('local', function(err, user) {
-            if(!user) {
-                res.json({
-                    "error": "Неверный логин или пароль",
-                    "status": "error"
-                });
-            } 
-            if(user) {
-                const {_id, email, name, contactPhone} = user
+// router.get('/signin', (req, res) => {
+//     res.sendFile(path.resolve(__dirname, '../../client/login.html'))
+// })
 
-                res.json({
-                    data: {id: _id, email, name, contactPhone},
-                    status: 'ok'
-                })
-            };
-    })(req,res,next);
+router.post('/signin', function(req,res,next) {
+    passport.authenticate('local', 
+    {   successRedirect: '/',
+        failureRedirect: '/signin'
+    }
+    // function(err, user) {
+    //         if(!user) {
+    //             res.json({
+    //                 "error": "Неверный логин или пароль",
+    //                 "status": "error"
+    //             });
+    //         } 
+    //         if(user) {
+    //             const {_id, email, name, contactPhone} = user
+
+    //             res.json({
+    //                 data: {id: _id, email, name, contactPhone},
+    //                 status: 'ok'
+    //             })
+    //         };
+    // }
+    )(req,res,next);
 });
 
 module.exports = router;

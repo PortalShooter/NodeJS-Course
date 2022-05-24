@@ -1,7 +1,8 @@
 const MessageModel = require('./model');
 
 const Message = {
-    send: async (data) => {
+    sendMessage: async (data) => {
+        // const {text} = data
         const newMessage = await new MessageModel(data)
 
         try {

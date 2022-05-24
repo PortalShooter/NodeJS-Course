@@ -15,6 +15,7 @@ const UserModule = {
             await newUser.save();
             return newUser
         } catch (e) {
+            console.log(e);
             return null
         }
         
