@@ -18,7 +18,6 @@ const UserModule = {
             console.log(e);
             return null
         }
-        
     },
 
     findByEmail: (email) => {

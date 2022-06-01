@@ -3,7 +3,6 @@ const router = express.Router();
 const crypto = require('crypto');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-const path = require('path')
 
 const UserModule = require('./service')
 
@@ -40,21 +39,27 @@ passport.deserializeUser(function(user, cb) {
 router.post('/signup', async function(req, res) {
     const user = await UserModule.create(req)
     if(!user) {
-        res.json({
-            error: "email занят",
-            status: "error"
-        })
+        res.redirect('/signup')
     }
-    if (user) {
-        const {_id, email, name, contactPhone} = user
-        console.log('user', user);
-        res.json({
-            data: {
-                id: _id, email, name, contactPhone
-            },
-            status: 'ok'
-        })
-    }  
+    if(user) {
+        res.redirect('/signin')
+    }
+    // if(!user) {
+    //     res.json({
+    //         error: "email занят",
+    //         status: "error"
+    //     })
+    // }
+    // if (user) {
+    //     const {_id, email, name, contactPhone} = user
+    //     console.log('user', user);
+    //     res.json({
+    //         data: {
+    //             id: _id, email, name, contactPhone
+    //         },
+    //         status: 'ok'
+    //     })
+    // }  
 });
 
 // router.get('/signin', (req, res) => {

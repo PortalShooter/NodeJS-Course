@@ -16,25 +16,25 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-const Message = require('./modules/Chat/Message/service')
+const Chat = require('./modules/Chat/service')
 
 const routesUser = require('./modules/UserModule/router');
 const routesAdvertisements = require('./modules/Advertisement/router');
 const routesMessage = require('./modules/Chat/Message/route');
 const routesChat = require('./modules/Chat/router');
 
+const sessionMiddleware = session({
+    store: new RedisStore({ client: redisClient }),
+    saveUninitialized: false,
+    secret: "keyboard cat",
+    resave: false,
+  })
+
 app.use(bodyParser.json());
 // app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(passport.initialize());
-app.use(
-    session({
-      store: new RedisStore({ client: redisClient }),
-      saveUninitialized: false,
-      secret: "keyboard cat",
-      resave: false,
-    })
-);
+app.use(sessionMiddleware);
 
 app.use('/api/chat', routesChat);
 app.use('/api/message', routesMessage);
@@ -42,9 +42,7 @@ app.use('/api/advertisements', routesAdvertisements);
 app.use('/api', routesUser);
 
 app.get('/', (req, res) => {
-    console.log('reqUser', req.user);
-    console.log('session', req.session);
-    if(!req.session.passport.user) {return res.sendFile(path.resolve(__dirname, './client/home.html'))}
+    if(!req.session.passport || !req.session.passport.user) {return res.sendFile(path.resolve(__dirname, './client/home.html'))}
     else {return res.sendFile(path.resolve(__dirname, './client/chat.html'))}
 })
 app.get('/signin', (req, res) => {
@@ -54,17 +52,21 @@ app.get('/signup', (req, res) => {
     res.sendFile(path.resolve(__dirname, './client/signup.html'))
 })
 
+const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+io.use(wrap(sessionMiddleware));
+
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.on('sendMessage', async (msg) => {
-        console.log(msg);
-        const newMessage = await Message.sendMessage(msg)
-        console.log(newMessage);
-        if (newMessage.status === 'ok') {
-            msg.type = 'newMessage';
-            socket.emit('newMessage', msg);
-        }
+    socket.on('sendMessage', async (data) => {
+        console.log('id user' ,socket.request.session.passport.user.id);
+        data.author = socket.request.session.passport.user.id
+        const newMessage = await Chat.sendMessage(data)
+        console.log('newMessage', newMessage);
+        // if (newMessage.status === 'ok') {
+        //     msg.type = 'newMessage';
+        //     socket.emit('newMessage', msg);
+        // }
     })
 
 });
