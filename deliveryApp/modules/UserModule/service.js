@@ -4,7 +4,7 @@ const User = require('./model');
 const salt = 'f844b09ff50c';
 
 const UserModule = {
-    create: async (req) => {
+    async create(req) {
         const {email, password, name, contactPhone} = req.body
         const hash = crypto.pbkdf2Sync(password, salt , 310000, 32, 'sha256')
         const passwordHash = hash.toString(`hex`)
@@ -20,7 +20,7 @@ const UserModule = {
         }
     },
 
-    findByEmail: (email) => {
+    findByEmail(email) {
         return User.findOne({ email })
     }
 }

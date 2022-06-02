@@ -46,15 +46,10 @@
     const inputText = document.querySelector('#text');
     const getHistory = document.querySelector('#getHistory');
     const sendMessage = document.querySelector('#sendMessage');
-    // const sendRoom = document.querySelector('#send-room');
 
     const getTmp = (msg) => {
         return `
                 <div class="list-group-item list-group-item-action">
-                    <div class="d-flex w-100 justify-content-between">
-                        <small>${msg.username}</small>
-                        <small class="text-muted">${msg.type}</small>
-                    </div>
                     <p class="mb-1">${msg.text}</p>
                 </div>
         `;
@@ -72,31 +67,19 @@
         });
     });
 
-    
-
-
-    socket.on('message-to-all', (msg) => {
-        const div = getTmp(msg);
-        boxList.insertAdjacentHTML('beforeend', div);
-    });
-    
-    socket.on('message-to-room', (msg) => {
-        const div = getTmp(msg);
-        boxList.insertAdjacentHTML('beforeend', div);
-    });
-
     getHistory.addEventListener('click', () => {
+        const idCompanion = '6282044ef792d46561b61bf2'
         socket.emit('getHistory', {
-           //Возможо сделать только после подписки на чат
+            idCompanion
         });
     });
 
-    // sendRoom.addEventListener('click', () => {
-    //     socket.emit('message-to-room', {
-    //         username: inputUsername.value,
-    //         text: inputText.value,
-    //     });
-    // });
+    socket.on('chatHistory', (getHistory) => {
+        getHistory.forEach(msg => {
+            const div = getTmp(msg);
+            boxList.insertAdjacentHTML('beforeend', div);
+        });
+    });
 
 </script>
 

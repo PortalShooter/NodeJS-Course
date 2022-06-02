@@ -3,7 +3,7 @@ const MessageModel = require('./Message/model')
 const User = require('../UserModule/service')
 
 const Chat = {
-    sendMessage: async (data) => {
+    async sendMessage(data) {
         const {receiverEmail, text, author} = data
 
         const findUser = await User.findByEmail(receiverEmail)
@@ -36,16 +36,24 @@ const Chat = {
         }
     },
     
-    find: (data) => {
-        return ChatModel({users: data})
+    find(data) {
+        console.log('data', data);
+        return ChatModel.findOne({users: data})
     },
 
-    subscribe: (data) => {
+    subscribe(data) {
         return data
     },
 
-    getHistory: (id) => {
-        return id
+    async getHistory({idCompanion, author}) {
+        const findChat = await this.find([author, idCompanion])
+
+        if(findChat && findChat.messages) {
+            const messages = await MessageModel.find( { _id: { $in : findChat.messages } } )
+            return messages
+        } 
+
+        return {status: 'error', msg: 'Такого чата нет'}
     }
 }
 

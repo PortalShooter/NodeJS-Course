@@ -20,7 +20,6 @@ const Chat = require('./modules/Chat/service')
 
 const routesUser = require('./modules/UserModule/router');
 const routesAdvertisements = require('./modules/Advertisement/router');
-const routesMessage = require('./modules/Chat/Message/route');
 const routesChat = require('./modules/Chat/router');
 
 const sessionMiddleware = session({
@@ -37,7 +36,6 @@ app.use(passport.initialize());
 app.use(sessionMiddleware);
 
 app.use('/api/chat', routesChat);
-app.use('/api/message', routesMessage);
 app.use('/api/advertisements', routesAdvertisements);
 app.use('/api', routesUser);
 
@@ -59,14 +57,31 @@ io.on('connection', (socket) => {
     console.log('a user connected');
 
     socket.on('sendMessage', async (data) => {
-        console.log('id user' ,socket.request.session.passport.user.id);
         data.author = socket.request.session.passport.user.id
         const newMessage = await Chat.sendMessage(data)
         console.log('newMessage', newMessage);
-        // if (newMessage.status === 'ok') {
-        //     msg.type = 'newMessage';
-        //     socket.emit('newMessage', msg);
-        // }
+
+        socket.broadcast.emit('newMessage', {
+            newMessage
+        });
+        socket.emit('newMessage', {
+            newMessage
+        });
+
+    })
+
+    socket.on('getHistory', async ({idCompanion}) => {
+        const author = socket.request.session.passport.user.id
+        const getHistory = await Chat.getHistory({idCompanion, author})
+        
+        if (Array.isArray(getHistory)) {
+            socket.broadcast.emit('chatHistory', {
+                getHistory
+            });
+            socket.emit('chatHistory', {
+                getHistory
+            });
+        }
     })
 
 });

@@ -1,0 +1,23 @@
+{
+  "name": "nodejs-course",
+  "version": "1.0.0",
+  "description": "Курсовая работа по ноде.",
+  "main": "index.js",
+  "dependencies": {
+    "socket.io": "^4.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "docker-compose up --build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PortalShooter/NodeJS-Course.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PortalShooter/NodeJS-Course/issues"
+  },
+  "homepage": "https://github.com/PortalShooter/NodeJS-Course#readme"
+}

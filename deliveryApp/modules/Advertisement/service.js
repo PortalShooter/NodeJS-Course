@@ -1,7 +1,7 @@
 const AdvertisementModel = require('./model');
 
 const Advertisement = {
-    find: (params) => {
+    find(params) {
         if (typeof params === 'object') {
             const {shortText, description, userId, tags} = params
             const search = {isDeleted: false}
@@ -18,7 +18,7 @@ const Advertisement = {
         
     },
 
-    create: async (data) => {
+    async create(data) {
         const {shortText, description, userId, tags, isDeleted} = data
         const createdAt = new Date;
         const updatedAt = createdAt;
@@ -34,7 +34,7 @@ const Advertisement = {
         }
     },
 
-    remove: async (id) => {
+    async remove(id) {
         await AdvertisementModel.deleteOne({_id: id})
 
         try {
