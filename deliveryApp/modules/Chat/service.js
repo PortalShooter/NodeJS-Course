@@ -28,7 +28,7 @@ const Chat = {
 
             try {
                 await newMessage.save()
-                return {status: 'ok', msg: 'Сообщение отправлено'}
+                return {status: 'ok', msg: 'Сообщение отправлено', text}
             }
             catch (e) {
                 return {status: 'error', error: e}

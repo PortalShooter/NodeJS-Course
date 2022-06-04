@@ -18,6 +18,11 @@ router.get('/', async (req, res) => {
     res.json(advertisements)
 })
 
+router.post('/', async (req, res) => {
+    const advertisements = await Advertisement.find();
+    res.json(advertisements)
+})
+
 router.get('/:id', async (req, res) => {
     const {id} = req.params
     const advertisements = await Advertisement.find(id);

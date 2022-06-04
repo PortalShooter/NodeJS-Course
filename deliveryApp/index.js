@@ -71,9 +71,12 @@ io.on('connection', (socket) => {
     })
 
     socket.on('getHistory', async ({idCompanion}) => {
+        console.log(333, idCompanion);
         const author = socket.request.session.passport.user.id
         const getHistory = await Chat.getHistory({idCompanion, author})
-        
+        console.log(getHistory);
+        console.log(Array.isArray(getHistory));
+
         if (Array.isArray(getHistory)) {
             socket.broadcast.emit('chatHistory', {
                 getHistory

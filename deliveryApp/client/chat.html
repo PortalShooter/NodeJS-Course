@@ -31,8 +31,10 @@
                 <textarea placeholder="Сообщение" class="form-control" id="text"></textarea>
             </div>
             <button type="submit" id="getHistory" class="btn btn-primary">Получить историю чата</button>
+            <br>
             <button type="submit" id="sendMessage" class="btn btn-primary">Отправить сообщение</button>
-            <button type="submit" id="send-room" class="btn btn-primary">room</button>
+            <br>
+            <button type="submit" id="getAdvertisements" class="btn btn-primary">Получить список объявлений</button>
         </div>
     </div>
 
@@ -46,7 +48,8 @@
     const inputText = document.querySelector('#text');
     const getHistory = document.querySelector('#getHistory');
     const sendMessage = document.querySelector('#sendMessage');
-
+    const getAdvertisements = document.querySelector('#getAdvertisements');
+    
     const getTmp = (msg) => {
         return `
                 <div class="list-group-item list-group-item-action">
@@ -56,8 +59,10 @@
     };
 
     socket.on('newMessage', (msg) => {
-        const div = getTmp(msg);
-        boxList.insertAdjacentHTML('beforeend', div);
+        if(msg && msg.newMessage.status === 'ok') {
+            const div = getTmp(msg.newMessage);
+            boxList.insertAdjacentHTML('beforeend', div);
+        }
     });
 
     sendMessage.addEventListener('click', () => {
@@ -67,15 +72,27 @@
         });
     });
 
+    getAdvertisements.addEventListener('click', () => {
+        console.log('Кнопка работает getAdvertisements');
+
+        fetch('http://localhost/api/advertisements', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+        }).then(async res => {
+            console.log('res', res);
+            const data = await res.json()
+            console.log('data', data);
+        })
+    })
+
     getHistory.addEventListener('click', () => {
-        const idCompanion = '6282044ef792d46561b61bf2'
-        socket.emit('getHistory', {
-            idCompanion
-        });
+        socket.emit('getHistory', {idCompanion: '6282044ef792d46561b61bf2'});
     });
 
-    socket.on('chatHistory', (getHistory) => {
-        getHistory.forEach(msg => {
+    socket.on('chatHistory', (res) => {
+        res.getHistory.forEach(msg => {
             const div = getTmp(msg);
             boxList.insertAdjacentHTML('beforeend', div);
         });
